@@ -80,7 +80,7 @@ func get_team_record(team string, year string) []string {
 			} else {
 				result = append(result, "Tennessee Titans")
 			}
-		case "lac":
+		case "sdg":
 			if (numeric_year == 1960) || (numeric_year >= 2017) {
 				result = append(result, "Los Angeles Chargers")
 			} else {
