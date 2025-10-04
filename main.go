@@ -41,7 +41,21 @@ func main() {
 
 		answer := scorigami(*s_winning_score, *s_losing_score)
 		fmt.Println(answer)
-		
+	case "season_overview":
+		so_commands := flag.NewFlagSet("season_overview", flag.ExitOnError)
+		so_year := so_commands.String("year", "", "League year")
+		so_commands.Parse(os.Args[2:])
 
+		overview := season_overview(*so_year)
+		fmt.Printf("=== %s SEASON ===\n", *so_year)
+		fmt.Printf("SB %s Champions: %s \n", overview[1], overview[0])
+		fmt.Printf("AP MVP: %s \n", overview[2])
+		fmt.Printf("AP OROY: %s \n", overview[3])
+		fmt.Printf("AP DROY: %s \n", overview[4])
+		fmt.Printf("AP OPOY: %s \n", overview[5])
+		fmt.Printf("AP DPOY: %s \n", overview[6])
+		fmt.Printf("%s \n", overview[7])
+		fmt.Printf("%s \n", overview[8])
+		fmt.Printf("%s \n", overview[9])
 	}
 }

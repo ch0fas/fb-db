@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -100,7 +101,7 @@ func scorigami(winner int, loser int) string {
 				h.ForEach("td", func(_ int, h *colly.HTMLElement) {
 					if hl.Attr("data-stat") == "counter" {
 						amount = hl.Text
-						if amount != "0" || amount != "" {
+						if amount != "" {
 							result = fmt.Sprintf("No Scorigami. The score of %s has happened %s times in NFL History", score_str, amount)
 						} 
 					}
@@ -117,4 +118,91 @@ func scorigami(winner int, loser int) string {
 		result = fmt.Sprintf("=== SCORIGAMI ALERT === \nAs of today, %s has never happpened before in NFL history", score_str)
 	}
 	return result
-} 
+}
+
+func season_overview(year string) []string {
+	var result []string
+
+	URL := fmt.Sprintf("https://www.pro-football-reference.com/years/%s/", year)
+	numeric_year, err := strconv.Atoi(year)
+	if err != nil {
+		fmt.Println("This is not a valid year. Try again please")
+		fmt.Println(numeric_year)
+	}
+
+	if numeric_year < 1972 {
+		log.Fatal("For now, the function only works starting in the 1972 season. Please try again")
+	}
+
+
+	// SB Winner
+	c.OnHTML("div#meta p:contains('Super Bowl Champion:')", func(h *colly.HTMLElement) {
+		sb_winner := h.ChildText("a")
+		sb_number := toRoman(numeric_year - 1965)
+
+		result = append(result, sb_winner)
+		result = append(result, sb_number)
+
+	})
+
+	// AP MVP
+	c.OnHTML("div#meta p:contains('AP MVP:')", func(h *colly.HTMLElement) {
+		mvp_winner := h.ChildText("a")
+
+		result = append(result, mvp_winner)
+	})
+
+	// OROY
+	c.OnHTML("div#meta p:contains('AP Offensive Rookie of the Year:')", func(h *colly.HTMLElement) {
+		oroy := h.ChildText("a")
+
+		result = append(result, oroy)
+	})
+
+	// DROY
+	c.OnHTML("div#meta p:contains('AP Defensive Rookie of the Year:')", func(h *colly.HTMLElement) {
+		droy := h.ChildText("a")
+
+		result = append(result, droy)
+	})
+
+	// OPOY
+	c.OnHTML("div#meta p:contains('AP Offensive Player of the Year:')", func(h *colly.HTMLElement) {
+		opoy := h.ChildText("a")
+
+		result = append(result, opoy)
+	})
+
+	// DPOY
+	c.OnHTML("div#meta p:contains('AP Defensive Player of the Year:')", func(h *colly.HTMLElement) {
+		dpoy := h.ChildText("a")
+
+		result = append(result, dpoy)
+	})
+
+	// Pasing Leader
+	c.OnHTML("div#meta p:contains('Passing Leader:')", func(h *colly.HTMLElement) {
+		passing_leader := h.Text
+
+		result = append(result, passing_leader)
+	})
+
+	// Rushing Leader
+	c.OnHTML("div#meta p:contains('Rushing Leader:')", func(h *colly.HTMLElement) {
+		rushing_leader := h.Text
+
+		result = append(result, rushing_leader)
+	})
+
+	// Receiving Leader
+	c.OnHTML("div#meta p:contains('Receiving Leader:')", func(h *colly.HTMLElement) {
+		receiving_leader := h.Text
+
+		result = append(result, receiving_leader)
+	})
+
+	c.Visit(URL)
+	c.Wait()
+
+	return result
+}
