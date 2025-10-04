@@ -33,6 +33,14 @@ func main() {
 		sb_winner := get_superbowl_winner(strconv.Itoa(*gsw_year))
 		fmt.Printf("== Super Bowl %s == \n", sb_winner[1])
 		fmt.Printf("Winner: %s \n", sb_winner[0])
+	case "scorigami":
+		s_commands := flag.NewFlagSet("scorigami", flag.ExitOnError)
+		s_winning_score := s_commands.Int("ws", 0, "Winning score")
+		s_losing_score := s_commands.Int("ls", 0, "Losing score")
+		s_commands.Parse(os.Args[2:])
+
+		answer := scorigami(*s_winning_score, *s_losing_score)
+		fmt.Println(answer)
 		
 
 	}

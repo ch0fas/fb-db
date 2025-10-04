@@ -12,6 +12,8 @@ import (
 	"github.com/gocolly/colly"
 )
 
+var c = colly.NewCollector()
+
 func toRoman(num int) string { // To create the roman numerals
 	var result string
 	values := []struct {
@@ -50,7 +52,6 @@ func get_superbowl_winner(year string) []string { // To define the winner and th
 	var result []string
 	
 	URL := "https://www.pro-football-reference.com/years/" + year + "/"
-	c := colly.NewCollector()
 	numeric_year, err := strconv.Atoi(year)
 	if err != nil {
 		fmt.Println("This is not a valid year. Try again please")
@@ -66,8 +67,6 @@ func get_superbowl_winner(year string) []string { // To define the winner and th
 
 	})
 
-
-
 	switch  {
 	case numeric_year > 2024, numeric_year < 1971:
 		result[1] = "N/A"
@@ -76,3 +75,46 @@ func get_superbowl_winner(year string) []string { // To define the winner and th
 	c.Visit(URL)
 	return result
 }
+
+func scorigami(winner int, loser int) string {
+	var result string
+
+	URL := "https://www.pro-football-reference.com/boxscores/game-scores.htm"
+	if winner < loser { // The loser can't have more points than the winner, evidently 
+		result := "Error: The losing team can't have more points than the winning team :("
+		return  result
+	}
+
+	score_str := strconv.Itoa(winner) + "-" + strconv.Itoa(loser)
+
+	c.OnHTML("table#games tr", func(h *colly.HTMLElement) {
+		score_found := false
+		var amount string
+
+		h.ForEach("td", func(_ int, hl *colly.HTMLElement) {
+			if strings.TrimSpace(hl.Text) == score_str {
+				score_found = true
+			}
+
+			if score_found {
+				h.ForEach("td", func(_ int, h *colly.HTMLElement) {
+					if hl.Attr("data-stat") == "counter" {
+						amount = hl.Text
+						if amount != "0" || amount != "" {
+							result = fmt.Sprintf("No Scorigami. The score of %s has happened %s times in NFL History", score_str, amount)
+						} 
+					}
+				})
+			}
+		})
+
+	})
+
+	c.Visit(URL)
+	c.Wait()
+
+	if result == "" {
+		result = fmt.Sprintf("=== SCORIGAMI ALERT === \nAs of today, %s has never happpened before in NFL history", score_str)
+	}
+	return result
+} 
